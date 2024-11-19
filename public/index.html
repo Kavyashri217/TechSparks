@@ -1,43 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internship Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #0077b6;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        .form-container, .list-container {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .form-container h2, .list-container h2 {
+            margin-top: 0;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #0077b6;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005f86;
+        }
+        .card {
+            background: #ffffff;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Internship Management System</h1>
+    </header>
+    <div class="container">
+        <!-- Authentication Section -->
+        <div class="form-container">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter your email" required />
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required />
+                <button type="submit">Login</button>
+            </form>
+        </div>
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+        <!-- Internship List Section -->
+        <div class="list-container">
+            <h2>My Internships</h2>
+            <div id="internshipList">
+                <!-- Dynamic Internship Cards will appear here -->
+            </div>
+        </div>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+        <!-- Upload Report Section -->
+        <div class="form-container">
+            <h2>Upload Report</h2>
+            <form id="uploadReportForm" enctype="multipart/form-data">
+                <label for="internshipId">Select Internship</label>
+                <select id="internshipId" required>
+                    <!-- Options dynamically generated -->
+                </select>
+                <label for="reportFile">Upload Report</label>
+                <input type="file" id="reportFile" accept=".pdf,.docx" required />
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+    </div>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+    <script>
+        // Base API URL
+        const API_URL = "http://127.0.0.1:8000";
+
+        // Fetch internships and populate the list
+        async function fetchInternships() {
+            try {
+                const response = await fetch(${API_URL}/internships/, {
+                    headers: { Authorization: Bearer ${localStorage.getItem("token")} }
+                });
+                const data = await response.json();
+
+                // Populate internship list
+                const internshipList = document.getElementById("internshipList");
+                const internshipIdSelect = document.getElementById("internshipId");
+                internshipList.innerHTML = "";
+                internshipIdSelect.innerHTML = "";
+
+                data.forEach((internship) => {
+                    const card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
+                        <h3>${internship.company_name}</h3>
+                        <p>Start Date: ${internship.start_date}</p>
+                        <p>Mentor: ${internship.mentor_name || "Not Assigned"}</p>
+                    `;
+                    internshipList.appendChild(card);
+
+                    const option = document.createElement("option");
+                    option.value = internship.id;
+                    option.textContent = internship.company_name;
+                    internshipIdSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error fetching internships:", error);
+            }
+        }
+
+        // Handle login form submission
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch(${API_URL}/token, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem("token", data.access_token);
+                    alert("Login successful!");
+                    fetchInternships(); // Load internships after login
+                } else {
+                    alert("Invalid login credentials");
+                }
+            } catch (error) {
+                console.error("Error logging in:", error);
+            }
+        });
+
+        // Handle report upload form submission
+        document.getElementById("uploadReportForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const internshipId = document.getElementById("internshipId").value;
+            const reportFile = document.getElementById("reportFile").files[0];
+
+            const formData = new FormData();
+            formData.append("internship_id", internshipId);
+            formData.append("file", reportFile);
+
+            try {
+                const response = await fetch(${API_URL}/reports/, {
+                    method: "POST",
+                    headers: { Authorization: Bearer ${localStorage.getItem("token")} },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert("Report uploaded successfully!");
+                } else {
+                    alert("Failed to upload report");
+                }
+            } catch (error) {
+                console.error("Error uploading report:", error);
+            }
+        });
+
+        // Fetch internships on page load (if logged in)
+        if (localStorage.getItem("token")) {
+            fetchInternships();
+        }
+    </script>
+</body>
 </html>
