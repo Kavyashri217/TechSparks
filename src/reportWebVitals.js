@@ -1,4 +1,5 @@
-import '@testing-library/jest-dom'; // Adds custom matchers for testing-library
-import { configure } from '@testing-library/react';
+const reportWebVitals = (metric) => {
+  console.log(metric); // This logs the web vital data 
+};
 
-configure({ testIdAttribute: 'data-testid' }); 
+export default reportWebVitals;
