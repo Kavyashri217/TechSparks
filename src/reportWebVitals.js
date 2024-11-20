@@ -1,13 +1,4 @@
-const reportWebVitals = onPerfEntry => {
-  if (onPerfEntry && onPerfEntry instanceof Function) {
-    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-      getCLS(onPerfEntry);
-      getFID(onPerfEntry);
-      getFCP(onPerfEntry);
-      getLCP(onPerfEntry);
-      getTTFB(onPerfEntry);
-    });
-  }
-};
+import '@testing-library/jest-dom'; // Adds custom matchers for testing-library
+import { configure } from '@testing-library/react';
 
-export default reportWebVitals;
+configure({ testIdAttribute: 'data-testid' }); 
