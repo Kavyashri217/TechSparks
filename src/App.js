@@ -9,6 +9,8 @@ import InternDetails from './components/InternDetails';
 import Login from './components/Login';
 import { useAuth } from './context/AuthContext';
 
+import './app.css';
+
 // Protected Route component
 const PrivateRoute = ({ component: Component, ...rest }) => {
   const { currentUser } = useAuth();
